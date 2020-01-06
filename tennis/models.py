@@ -54,7 +54,8 @@ class BookingParameter(TimeStampedModel):
         max_length=1000,
         choices=DAY_OF_WEEK_CHOICES,
         blank=False, default='Saturday')
-	time_of_day = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(24.0)],)
+	time_of_day = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(24.0)])
+	active = models.BooleanField(blank=False, default=True)
 
 BOOKING_STATUS_CHOICES = (
 	('Pending', 'Pending'),
@@ -71,8 +72,8 @@ class Booking(TimeStampedModel):
         max_length=1000,
         choices=BOOKING_STATUS_CHOICES,
         blank=False, default='Pending')
-	booking_number = models.CharField(max_length=100, blank=True)
-	failure_reason = models.CharField(max_length=100, blank=True)
+	booking_number = models.CharField(max_length=100, blank=True, default=None)
+	failure_reason = models.CharField(max_length=100, blank=True, default=None)
 
 
 
