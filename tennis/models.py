@@ -28,20 +28,14 @@ class UserProfile(TimeStampedModel):
         return "{} {}".format(self.user.first_name, self.user.last_name)
 
 
-COURT_LOCATION_CHOICES = (
-    ('Alice Marbles', 'Alice Marbles'),
-    ('Crocker Amazon', 'Crocker Amazon'),
-    ('Dolores Park', 'Dolores Park'),
-    ('Hamilton Rec', 'Hamilton Rec'),
-    ('Mountain Lake Park', 'Mountain Lake Park'),
-)
-
 class CourtLocation(TimeStampedModel):
 	name = models.CharField(
         max_length=1000,
-        choices=COURT_LOCATION_CHOICES,
-        blank=False, default='Alice Marbles')
+        # choices=COURT_LOCATION_CHOICES,
+        blank=False, unique=True, default='Alice Marbles')
 
+	def __str__(self):
+		return self.name
 
 DAY_OF_WEEK_CHOICES = (
 	('Monday', 'Monday'),
@@ -50,7 +44,7 @@ DAY_OF_WEEK_CHOICES = (
 	('Thursday', 'Thursday'),
 	('Friday', 'Friday'),
 	('Saturday', 'Saturday'),
-	('Sunday', 'Sunday'),
+	('Sunday', 'Sunday')
 )
 
 class BookingParameter(TimeStampedModel):
@@ -61,13 +55,22 @@ class BookingParameter(TimeStampedModel):
         choices=DAY_OF_WEEK_CHOICES,
         blank=False, default='Saturday')
 	time_of_day = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(24.0)],)
-    
+
+BOOKING_STATUS_CHOICES = (
+	('Pending', 'Pending'),
+	('Succeeded', 'Succeeded'),
+	('Failed', 'Failed')
+)
 
 class Booking(TimeStampedModel):
 	user = models.ForeignKey(User, blank=False, on_delete=models.CASCADE, related_name="bookings")
 	court_location = models.ForeignKey(CourtLocation, blank=False, on_delete=models.CASCADE, related_name="bookings")
-	court_number = models.CharField(max_length=100, blank=False, default='1')
+	court_number = models.CharField(max_length=100, blank=True)
 	datetime = models.DateTimeField(blank=False)
+	status = models.CharField(
+        max_length=1000,
+        choices=BOOKING_STATUS_CHOICES,
+        blank=False, default='Pending')
 	booking_number = models.CharField(max_length=100, blank=True)
 	failure_reason = models.CharField(max_length=100, blank=True)
 
