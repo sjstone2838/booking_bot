@@ -7,10 +7,12 @@ from tennis.models import BookingParameter
 from tennis.models import Booking
 
 import time
+import pytz
 import datetime
 
 # import pytest
 import time
+
 
 import json
 
@@ -30,6 +32,7 @@ CHROMEDRIVER_PATH = 'WebDriver/bin/chromedriver'
 
 def check_desired_date(booking_datetime):
     now = LOCAL_TIME_ZONE.localize(datetime.datetime.now(), is_dst=True)
+
     max_booking_date = now + datetime.timedelta(days=MAX_LOOKAHEAD_DAYS, hours=-CALENDAR_ADVANCE_TIME)
 
     if booking_datetime.date() > max_booking_date.date():
@@ -186,16 +189,6 @@ def make_booking(driver, booking_link, booking_datetime):
     return booking_number
     
 
-# def confirm_successful_booking(booking_datetime, court_name, booking_number):
-#     print('You are confirmed for {} on {} from {}-{}, booking number {}'.format(
-#         court_name, 
-#         booking_datetime.strftime("%a, %b %d, %Y"),
-#         booking_datetime.strftime("%I:%M %p"),
-#         (booking_datetime + datetime.timedelta(minutes=BOOKING_LENGTH_MINUTES)).strftime("%I:%M %p"),
-#         booking_number
-#     ))
-
-
 def confirm_unsuccessful_booking(booking_datetime, court_location):
 	return 'No available courts at {} on {}'.format(
 		court_location, 
@@ -222,14 +215,13 @@ def book_court(root_url, login_email, login_password, booking_datetime, court_lo
         if booking_available_indicator:
             booking_number = make_booking(driver, booking_link, booking_datetime)
             return True, booking_number, court_name, None
-            # booking_successful = True
-            # confirm_successful_booking(booking_datetime, court_name, booking_number)
             break
     
     if not booking_successful:
         return False, None, None, confirm_unsuccessful_booking(booking_datetime, court_location)
         
    
+pacific = pytz.timezone('US/Pacific')
 
 
 class Command(BaseCommand):
@@ -247,17 +239,23 @@ class Command(BaseCommand):
 					pending_booking_count, 
 					booking.user,
 					booking.court_location,
-					booking.datetime.strftime('%a, %b %d, %Y %I:%M %p')
+					# LOCAL_TIME_ZONE.localize(booking.datetime).strftime('%a, %b %d, %Y %I:%M %p %Z')
+					booking.datetime.astimezone(pacific).strftime('%a, %b %d, %Y %I:%M %p %Z')
 				))
 
-			booking_successful, booking_number, court_name, failure_reason = book_court(
-				ROOT_URL, 
-				booking.user.user_profile.spotery_login,
-				booking.user.user_profile.spotery_password,
-				booking.datetime,
-				booking.court_location
-			)
-
+			try:
+				booking_successful, booking_number, court_name, failure_reason = book_court(
+					ROOT_URL, 
+					booking.user.user_profile.spotery_login,
+					booking.user.user_profile.spotery_password,
+					booking.datetime.astimezone(pacific),
+					booking.court_location
+				)
+			except ValueError as failure_reason:
+				booking.status = 'Failed'
+				booking.failure_reason = failure_reason
+				booking.save()
+				continue
 
 			if booking_successful:
 				booking.status = 'Succeeded'

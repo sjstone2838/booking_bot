@@ -39,18 +39,13 @@ class Command(BaseCommand):
 				else:
 					date_counter = date_counter + datetime.timedelta(days=1)
 
-			next_datetime_to_book = datetime.datetime(
+			next_datetime_to_book = LOCAL_TIME_ZONE.localize(datetime.datetime(
 				date_counter.year,
 				date_counter.month,
 				date_counter.day,
 				int(bp.time_of_day),
 				int((bp.time_of_day - int(bp.time_of_day)) * 60)
-			)
-
-			# print('{} {} {} -->    {}'.format(bp.user, bp.day_of_week, 
-			# 	bp.time_of_day, 
-			# 	next_datetime_to_book.strftime("%a, %b %d, %Y at %I:%M %p %Z")
-			# ))
+			), is_dst=True)
 
 			print('Creating booking {}'.format(i))
 
@@ -58,11 +53,8 @@ class Command(BaseCommand):
 		        user = bp.user,
 				court_location = bp.court_location,
 				datetime = next_datetime_to_book,
-				# status = 'Pending',
-				# court_number = None,
-				# booking_number = None,
-				# failure_reason = None
 		    )
+
 			
 			if created:
 				new_pending_booking_count += 1

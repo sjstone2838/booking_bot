@@ -66,14 +66,14 @@ BOOKING_STATUS_CHOICES = (
 class Booking(TimeStampedModel):
 	user = models.ForeignKey(User, blank=False, on_delete=models.CASCADE, related_name="bookings")
 	court_location = models.ForeignKey(CourtLocation, blank=False, on_delete=models.CASCADE, related_name="bookings")
-	court_number = models.CharField(max_length=100, blank=True)
+	court_number = models.CharField(max_length=100, blank=True, default='')
 	datetime = models.DateTimeField(blank=False)
 	status = models.CharField(
         max_length=1000,
         choices=BOOKING_STATUS_CHOICES,
         blank=False, default='Pending')
-	booking_number = models.CharField(max_length=100, blank=True, default=None)
-	failure_reason = models.CharField(max_length=100, blank=True, default=None)
+	booking_number = models.CharField(max_length=100, blank=True, default='')
+	failure_reason = models.CharField(max_length=100, blank=True, default='')
 
 
 
