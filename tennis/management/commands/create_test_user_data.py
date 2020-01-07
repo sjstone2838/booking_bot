@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from tennis.models import UserProfile
 from tennis.models import CourtLocation
 from tennis.models import BookingParameter
-from tennis.models import Booking
+# from tennis.models import Booking
 
 # from utils import execute
 # from utils import random_date
@@ -25,7 +25,7 @@ class Command(BaseCommand):
             email='sam.stone@opendoor.com'
         )[0]
 
-        user_profile = UserProfile.objects.get_or_create(
+        UserProfile.objects.get_or_create(
             user=user,
             spotery_login=user.email,
             spotery_password='abcde12345'
@@ -35,9 +35,9 @@ class Command(BaseCommand):
             name='Hamilton Rec'
         )[0]
 
-        booking_parameter = BookingParameter.objects.get_or_create(
-            user = user,
-            court_location = court_location,
-            day_of_week = 'Saturday',
-            time_of_day = 10.5
+        BookingParameter.objects.get_or_create(
+            user=user,
+            court_location=court_location,
+            day_of_week='Saturday',
+            time_of_day=10.5
         )[0]
