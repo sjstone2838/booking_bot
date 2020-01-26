@@ -28,9 +28,22 @@ from .spotery_constants import CALENDAR_ADVANCE_TIME
 from .spotery_constants import LONG_POLE_WAIT
 from .spotery_constants import DRIVER_WAIT
 
-CHROMEDRIVER_PATH = 'WebDriver/bin/chromedriver'
-
 pacific = pytz.timezone('US/Pacific')
+
+# Use for local dev
+# CHROMEDRIVER_PATH = 'WebDriver/bin/chromedriver'
+# driver = webdriver.Chrome(CHROMEDRIVER_PATH)
+
+# Use for Heroku
+GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google_chrome'
+CHROMEDRIVER_PATH = '/app/.chromedriver/bin/chromedriver'
+
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument('--disable-gpu')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.binary_location = GOOGLE_CHROME_PATH
+
+driver = webdriver.Chrome(execution_path=CHROMEDRIVER_PATH, chrome_options=chrome_options)
 
 
 def check_desired_date(booking_datetime):
@@ -48,9 +61,7 @@ def check_desired_date(booking_datetime):
             ))
 
 
-def authenticate(root_url, login_email, login_password):
-    driver = webdriver.Chrome(CHROMEDRIVER_PATH)
-
+def authenticate(driver, root_url, login_email, login_password):
     driver.get(root_url)
     driver.find_element(By.LINK_TEXT, "login / sign up").click()
 
