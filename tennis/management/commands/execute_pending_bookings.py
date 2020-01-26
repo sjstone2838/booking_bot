@@ -34,6 +34,7 @@ pacific = pytz.timezone('US/Pacific')
 # CHROMEDRIVER_PATH = 'WebDriver/bin/chromedriver'
 # driver = webdriver.Chrome(CHROMEDRIVER_PATH)
 
+
 # Use for Heroku
 GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google_chrome'
 CHROMEDRIVER_PATH = '/app/.chromedriver/bin/chromedriver'
