@@ -231,9 +231,9 @@ def confirm_unsuccessful_booking(booking_datetime, court_location):
     )
 
 
-def book_court(root_url, login_email, login_password, booking_datetime, court_location):
+def book_court(driver, root_url, login_email, login_password, booking_datetime, court_location):
     check_desired_date(booking_datetime)
-    driver = authenticate(root_url, login_email, login_password)
+    driver = authenticate(driver, root_url, login_email, login_password)
     search_for_date(driver, booking_datetime)
     court_links = identify_relevant_courts(driver, court_location)
 
@@ -277,6 +277,7 @@ class Command(BaseCommand):
 
             try:
                 booking_successful, booking_number, court_name, failure_reason = book_court(
+                    driver,
                     ROOT_URL,
                     booking.user.user_profile.spotery_login,
                     booking.user.user_profile.spotery_password,
