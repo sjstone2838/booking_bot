@@ -27,8 +27,10 @@ def get_env_variable(var_name):
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_env_variable('BOOKING_BOT_DJANGO_SECRET_KEY')
+# SECRET_KEY = get_env_variable('BOOKING_BOT_DJANGO_SECRET_KEY')
+SECRET_KEY = 'd01vm&7a4i7qqbf%2i_qa9!gmf@ijyo!si!tqm^*bu1jnf0(!o'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -127,3 +129,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Cron syntax
+'''
+ <Minute> <Hour> <Day of Month> <Month> <Day of week>
+ * = any value
+'''

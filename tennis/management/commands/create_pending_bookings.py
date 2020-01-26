@@ -1,19 +1,30 @@
 from django.core.management.base import BaseCommand
 
-# from django.contrib.auth.models import User
-# from tennis.models import UserProfile
-# from tennis.models import CourtLocation
 from tennis.models import BookingParameter
 from tennis.models import Booking
 
-# import time
 import datetime
-
-# import time
 
 from .spotery_constants import LOCAL_TIME_ZONE
 # from .spotery_constants import MAX_LOOKAHEAD_DAYS
 # from .spotery_constants import CALENDAR_ADVANCE_TIME
+
+'''
+Notes on the crontab
+
+Run this in the terminal:
+$ crontab -e
+
+Then put the following 1 line in the crontab file:
+*/1 * * * * source ~/.virtualenvs/booking_bot/bin/activate && cd ~/code/booking_bot && python manage.py test_cron_command
+
+This will run (1) activate a virtual_env called booking_bot, (2) cd to the root directory of the
+Django project, and (3) run the command in tennis/management/commands/test_cron_command.py
+
+Note that the following line silences crontab mail / output:
+MAILTO="" # silences crontab mail
+
+'''
 
 
 class Command(BaseCommand):
