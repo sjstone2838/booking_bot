@@ -31,33 +31,7 @@ from .spotery_constants import DRIVER_WAIT
 
 pacific = pytz.timezone('US/Pacific')
 
-# Use for local dev
-# CHROMEDRIVER_PATH = 'WebDriver/bin/chromedriver'
-# driver = webdriver.Chrome(CHROMEDRIVER_PATH)
 
-
-# Use for Heroku
-# GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google_chrome'
-# CHROMEDRIVER_PATH = '/app/.chromedriver/bin/chromedriver'
-
-# chrome_options = webdriver.ChromeOptions()
-# chrome_options.add_argument('--disable-gpu')
-# chrome_options.add_argument('--no-sandbox')
-# chrome_options.binary_location = GOOGLE_CHROME_PATH
-
-# driver = webdriver.Chrome(CHROMEDRIVER_PATH, chrome_options=chrome_options)
-
-
-CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
-
-chrome_bin = os.environ.get('GOOGLE_CHROME_SHIM', None)
-options = webdriver.ChromeOptions()
-options.binary_location = chrome_bin
-options.add_argument("--disable-gpu")
-options.add_argument("--no-sandbox")
-options.add_argument('headless')
-options.add_argument('window-size=1200x600')
-driver = webdriver.Chrome(CHROMEDRIVER_PATH, chrome_options=options)
 
 
 def check_desired_date(booking_datetime):
@@ -275,6 +249,21 @@ class Command(BaseCommand):
                     booking.datetime.astimezone(pacific).strftime('%a, %b %d, %Y %I:%M %p %Z')
                 ))
 
+            # Use for local dev
+            # CHROMEDRIVER_PATH = 'WebDriver/bin/chromedriver'
+            # driver = webdriver.Chrome(CHROMEDRIVER_PATH)
+
+            # Use for Heroku
+            CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
+            chrome_bin = os.environ.get('GOOGLE_CHROME_SHIM', None)
+            options = webdriver.ChromeOptions()
+            options.binary_location = chrome_bin
+            options.add_argument("--disable-gpu")
+            options.add_argument("--no-sandbox")
+            options.add_argument('headless')
+            options.add_argument('window-size=1200x600')
+            driver = webdriver.Chrome(CHROMEDRIVER_PATH, chrome_options=options)
+
             try:
                 booking_successful, booking_number, court_name, failure_reason = book_court(
                     driver,
@@ -300,3 +289,4 @@ class Command(BaseCommand):
                 booking.failure_reason = failure_reason
 
             booking.save()
+            driver.quit()
