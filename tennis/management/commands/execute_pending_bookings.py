@@ -278,6 +278,12 @@ class Command(BaseCommand):
                 booking.failure_reason = failure_reason
                 booking.save()
                 continue
+            # sometimes book_court() will fail without a ValueError
+            else:
+                booking.status = 'Failed'
+                booking.failure_reason = 'Not a ValueError'
+                booking.save()
+                continue
 
             if booking_successful:
                 booking.status = 'Succeeded'
