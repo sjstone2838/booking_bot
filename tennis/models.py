@@ -80,4 +80,5 @@ class Booking(TimeStampedModel):
         choices=BOOKING_STATUS_CHOICES,
         blank=False, default='Pending')
     booking_number = models.CharField(max_length=100, blank=True, default='')
+    confirmation_screenshot_path = models.CharField(max_length=100, blank=True, default='')
     failure_reason = models.CharField(max_length=100, blank=True, default='')

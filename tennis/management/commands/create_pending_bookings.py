@@ -6,25 +6,6 @@ from tennis.models import Booking
 import datetime
 
 from .spotery_constants import LOCAL_TIME_ZONE
-# from .spotery_constants import MAX_LOOKAHEAD_DAYS
-# from .spotery_constants import CALENDAR_ADVANCE_TIME
-
-'''
-Notes on the crontab
-
-Run this in the terminal:
-$ crontab -e
-
-Then put the following 1 line in the crontab file:
-*/1 * * * * source ~/.virtualenvs/booking_bot/bin/activate && cd ~/code/booking_bot && python manage.py test_cron_command
-
-This will run (1) activate a virtual_env called booking_bot, (2) cd to the root directory of the
-Django project, and (3) run the command in tennis/management/commands/test_cron_command.py
-
-Note that the following line silences crontab mail / output:
-MAILTO="" # silences crontab mail
-
-'''
 
 
 class Command(BaseCommand):
@@ -39,9 +20,12 @@ class Command(BaseCommand):
         new_pending_booking_count = 0
         for i, bp in enumerate(booking_parameters):
 
+            # start by considering bookings for tomorrow (not today)
             date_counter = datetime.datetime.now() + datetime.timedelta(days=1)
 
             advance_another_day = True
+
+            # advance until date_counter is the next instance of the desired day of week
             while advance_another_day:
 
                 if date_counter.strftime('%A') == bp.day_of_week:
@@ -58,8 +42,6 @@ class Command(BaseCommand):
                 int((bp.time_of_day - int(bp.time_of_day)) * 60)
             ), is_dst=True)
 
-            print('Creating booking {}'.format(i))
-
             booking, created = Booking.objects.get_or_create(
                 user=bp.user,
                 court_location=bp.court_location,
@@ -67,6 +49,9 @@ class Command(BaseCommand):
             )
 
             if created:
+                print('Creating booking {}'.format(i))
                 new_pending_booking_count += 1
+            else:
+                print('Booking {} already exists'.format(i))
 
         print('New pending booking count: {}'.format(new_pending_booking_count))

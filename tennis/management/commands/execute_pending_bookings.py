@@ -32,8 +32,6 @@ from .spotery_constants import DRIVER_WAIT
 pacific = pytz.timezone('US/Pacific')
 
 
-
-
 def check_desired_date(booking_datetime):
     now = LOCAL_TIME_ZONE.localize(datetime.datetime.now(), is_dst=True)
 
@@ -169,7 +167,7 @@ def check_reached_use_booking_limit(driver, booking_datetime):
     return
 
 
-def make_booking(driver, booking_link, booking_datetime):
+def make_booking(driver, booking_link, booking_datetime, booking_id, username):
     booking_link.click()
 
     check_reached_use_booking_limit(driver, booking_datetime)
@@ -195,7 +193,10 @@ def make_booking(driver, booking_link, booking_datetime):
     # Note: we refer to this as the booking number, to be consistent with the general
     # use of "booking" in this codebase, but Spotery calls this a reservation number
     booking_number = confirmation_span.text.split('#')[1].strip(' ')
-    return booking_number
+
+    screenshot_path = 'media/booking_screenshots/booking_id_{}.png'.format(booking_id)
+    driver.get_screenshot_as_file(screenshot_path)
+    return booking_number, screenshot_path
 
 
 def confirm_unsuccessful_booking(booking_datetime, court_location):
@@ -205,7 +206,8 @@ def confirm_unsuccessful_booking(booking_datetime, court_location):
     )
 
 
-def book_court(driver, root_url, login_email, login_password, booking_datetime, court_location):
+def book_court(driver, root_url, login_email, login_password, booking_datetime,
+               court_location, booking_id, username):
     check_desired_date(booking_datetime)
     driver = authenticate(driver, root_url, login_email, login_password)
     search_for_date(driver, booking_datetime)
@@ -223,12 +225,14 @@ def book_court(driver, root_url, login_email, login_password, booking_datetime, 
         booking_available_indicator = check_booking_availability(driver, booking_link)
 
         if booking_available_indicator:
-            booking_number = make_booking(driver, booking_link, booking_datetime)
-            return True, booking_number, court_name, None
+            booking_number, screenshot_path = make_booking(
+                driver, booking_link, booking_datetime, booking_id, username)
+            return True, booking_number, screenshot_path, court_name, None
             break
 
     if not booking_successful:
-        return False, None, None, confirm_unsuccessful_booking(booking_datetime, court_location)
+        return False, None, None, None, confirm_unsuccessful_booking(
+            booking_datetime, court_location)
 
 
 class Command(BaseCommand):
@@ -265,14 +269,16 @@ class Command(BaseCommand):
             driver = webdriver.Chrome(CHROMEDRIVER_PATH, chrome_options=options)
 
             try:
-                booking_successful, booking_number, court_name, failure_reason = book_court(
-                    driver,
-                    ROOT_URL,
-                    booking.user.user_profile.spotery_login,
-                    booking.user.user_profile.spotery_password,
-                    booking.datetime.astimezone(pacific),
-                    booking.court_location
-                )
+                booking_successful, booking_number, screenshot_path, court_name, failure_reason = book_court(
+                        driver,
+                        ROOT_URL,
+                        booking.user.user_profile.spotery_login,
+                        booking.user.user_profile.spotery_password,
+                        booking.datetime.astimezone(pacific),
+                        booking.court_location,
+                        booking.id,
+                        booking.user.username
+                    )
             except ValueError as failure_reason:
                 booking.status = 'Failed'
                 booking.failure_reason = failure_reason
@@ -288,6 +294,7 @@ class Command(BaseCommand):
             if booking_successful:
                 booking.status = 'Succeeded'
                 booking.booking_number = booking_number
+                booking.confirmation_screenshot_path = screenshot_path
                 # TODO: align naming court_number = court_name
                 booking.court_number = court_name
             else:
