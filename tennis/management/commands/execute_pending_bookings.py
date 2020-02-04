@@ -196,7 +196,7 @@ def make_booking(driver, booking_link, booking_datetime, booking_id, username):
     # use of "booking" in this codebase, but Spotery calls this a reservation number
     booking_number = confirmation_span.text.split('#')[1].strip(' ')
 
-    screenshot_path = 'media/booking_screenshots/booking_id_{}.png'.format(booking_id)
+    screenshot_path = 'media/booking_id_{}.png'.format(booking_id)
     driver.get_screenshot_as_file(screenshot_path)
     return booking_number, screenshot_path
 
