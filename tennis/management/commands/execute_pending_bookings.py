@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
 
+from django.core.mail import EmailMessage
+
 # from django.contrib.auth.models import User
 # from tennis.models import UserProfile
 # from tennis.models import CourtLocation
@@ -253,20 +255,21 @@ class Command(BaseCommand):
                     booking.datetime.astimezone(pacific).strftime('%a, %b %d, %Y %I:%M %p %Z')
                 ))
 
-            # Use for local dev
-            # CHROMEDRIVER_PATH = 'WebDriver/bin/chromedriver'
-            # driver = webdriver.Chrome(CHROMEDRIVER_PATH)
-
-            # Use for Heroku
-            CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
-            chrome_bin = os.environ.get('GOOGLE_CHROME_SHIM', None)
-            options = webdriver.ChromeOptions()
-            options.binary_location = chrome_bin
-            options.add_argument("--disable-gpu")
-            options.add_argument("--no-sandbox")
-            options.add_argument('headless')
-            options.add_argument('window-size=1200x600')
-            driver = webdriver.Chrome(CHROMEDRIVER_PATH, chrome_options=options)
+            if os.environ['ENVIRONMENT'] == 'local':
+                # Use for local dev
+                CHROMEDRIVER_PATH = 'WebDriver/bin/chromedriver'
+                driver = webdriver.Chrome(CHROMEDRIVER_PATH)
+            else:
+                # Use for Heroku
+                CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
+                chrome_bin = os.environ.get('GOOGLE_CHROME_SHIM', None)
+                options = webdriver.ChromeOptions()
+                options.binary_location = chrome_bin
+                options.add_argument("--disable-gpu")
+                options.add_argument("--no-sandbox")
+                options.add_argument('headless')
+                options.add_argument('window-size=1200x600')
+                driver = webdriver.Chrome(CHROMEDRIVER_PATH, chrome_options=options)
 
             try:
                 booking_successful, booking_number, screenshot_path, court_name, failure_reason = book_court(
@@ -285,11 +288,11 @@ class Command(BaseCommand):
                 booking.save()
                 continue
             # sometimes book_court() will fail without a ValueError
-            else:
-                booking.status = 'Failed'
-                booking.failure_reason = 'Not a ValueError'
-                booking.save()
-                continue
+            # else:
+            #     booking.status = 'Failed'
+            #     booking.failure_reason = 'Not a ValueError'
+            #     booking.save()
+            #     continue
 
             if booking_successful:
                 booking.status = 'Succeeded'
@@ -297,9 +300,38 @@ class Command(BaseCommand):
                 booking.confirmation_screenshot_path = screenshot_path
                 # TODO: align naming court_number = court_name
                 booking.court_number = court_name
+
+                email = EmailMessage(
+                    'Tennis Court Booking Successful',
+                    '''We booked {} for you on {}.
+                    Your booking confirmation is attached; please bring this with you to the court.
+                    '''.format(
+                        court_name,
+                        booking.datetime.astimezone(pacific).strftime('%a, %b %d, %Y %I:%M %p %Z')
+                    ),
+                    'bart.booking.2020@gmail.com',
+                    [booking.user.email],
+                )
+                email.attach_file(screenshot_path)
+                email.send()
+
             else:
                 booking.status = 'Failed'
                 booking.failure_reason = failure_reason
+
+                email = EmailMessage(
+                    'Tennis Court Booking Failed',
+                    ''''Oh no! We tried and failed to book a court for you at {} on {}.
+                    The reason was: {}
+                    '''.format(
+                        booking.court_location,
+                        booking.datetime.astimezone(pacific).strftime('%a, %b %d, %Y %I:%M %p %Z'),
+                        failure_reason
+                    ),
+                    'bart.booking.2020@gmail.com',
+                    [booking.user.email],
+                )
+                email.send()
 
             booking.save()
             driver.quit()
