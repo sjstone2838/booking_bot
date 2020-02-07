@@ -89,14 +89,17 @@ def search_for_date(driver, booking_datetime):
     # Set day in calendar search widget
     # class xod is for days in the next month, xof is the previous month, xoe is current month
     try:
+        print('not tomorrow')
         driver.find_element(By.XPATH, "//td[@class='xoe' and text()='{}']".format(
             booking_datetime.day)).click()
     # if the desired date is tomorrow, then it is class xo2
     except Exception:
+        print('tomorrow')
         driver.find_element(By.XPATH, "//td[@class='xo2 p_AFSelected' and text()='{}']".format(
             booking_datetime.day)).click()
 
     # Advance to search page
+    time.sleep(LONG_POLE_WAIT)
     driver.find_element(By.LINK_TEXT, "search").click()
 
 
