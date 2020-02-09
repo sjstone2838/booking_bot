@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 # from __future__ import unicode_literals
 
@@ -60,6 +61,18 @@ class BookingParameter(TimeStampedModel):
         blank=False, default='Saturday')
     time_of_day = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(24.0)])
     active = models.BooleanField(blank=False, default=True)
+
+    def clean(self, *args, **kwargs):
+        if len(BookingParameter.objects.filter(user=self.user).exclude(pk=self.pk)) == 3:
+            raise ValidationError('Failed to save new booking param: {} already has 3 booking \
+                params'.format(
+                self.user))
+        elif len(BookingParameter.objects.filter(
+                user=self.user,
+                day_of_week=self.day_of_week).exclude(pk=self.pk)) == 1:
+            raise ValidationError(
+                'Failed to save new booking param: {} already has a booking param on {}'.format(
+                    self.user, self.day_of_week))
 
 
 BOOKING_STATUS_CHOICES = (

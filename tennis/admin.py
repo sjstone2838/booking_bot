@@ -33,6 +33,7 @@ admin.site.register(CourtLocation, CourtLocationAdmin)
 class BookingParameterAdmin(admin.ModelAdmin):
     list_display = standard_fields(BookingParameter)
     list_display_links = list_display
+    list_filter = ('user', 'active', 'day_of_week', 'court_location')
 
 
 admin.site.register(BookingParameter, BookingParameterAdmin)
@@ -41,6 +42,7 @@ admin.site.register(BookingParameter, BookingParameterAdmin)
 class BookingAdmin(admin.ModelAdmin):
     list_display = standard_fields(Booking)
     list_display_links = list_display
+    list_filter = ('user', 'status', 'court_location')
 
 
 admin.site.register(Booking, BookingAdmin)
