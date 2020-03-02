@@ -283,11 +283,9 @@ class Command(BaseCommand):
                         booking.id,
                         booking.user.username
                     )
-            except ValueError as failure_reason:
-                booking.status = 'Failed'
-                booking.failure_reason = failure_reason
-                booking.save()
-                continue
+            except ValueError as _failure_reason:
+                booking_successful = False
+                failure_reason = _failure_reason
             # sometimes book_court() will fail without a ValueError
             # else:
             #     booking.status = 'Failed'
@@ -304,26 +302,48 @@ class Command(BaseCommand):
 
                 email = EmailMessage(
                     'Tennis Court Booking Successful',
-                    '''We booked {} for you on {}.
-                    Your booking confirmation is attached; please bring this with you to the court.
+                    '''\
+                    <html>
+                      <head></head>
+                      <body>
+                        <p>We booked {} for you on {}.</p>
+                        <p>Your booking confirmation is attached; please bring this with you to the court.</p>
+                        <p>If you need to cancel or change your booking, please do so at <a href="https://spotery.com/f/adf.task-flow?adf.tfDoc=%2FWEB-INF%2Ftaskflows%2Ffacility%2Ftf-faci-detail.xml&psOrgaAlias=sfrp&adf.tfId=tf-faci-detail">SF Tennis Court Reservations</a>, using:</p>
+                        <ul>
+                            <li>login: {}</li>
+                            <li>password: {}</li>
+                        </ul>
+                        <p>Please be a good SF tennis citizen and cancel your booking if you aren't able to use it!</p>
+                        <p>Happy Hitting,</p>
+                        <p>Booking Bot</p>
+                      </body>
+                    </html>
                     '''.format(
                         court_name,
-                        booking.datetime.astimezone(pacific).strftime('%a, %b %d, %Y %I:%M %p %Z')
+                        booking.datetime.astimezone(pacific).strftime('%a, %b %d, %Y %I:%M %p %Z'),
+                        booking.user.user_profile.spotery_login,
+                        booking.user.user_profile.spotery_password
                     ),
                     'bart.booking.2020@gmail.com',
                     [booking.user.email],
                 )
                 email.attach_file(screenshot_path)
+                email.content_subtype = "html"
                 email.send()
 
             else:
                 booking.status = 'Failed'
                 booking.failure_reason = failure_reason
-
+                booking.save()
                 email = EmailMessage(
                     'Tennis Court Booking Failed',
-                    ''''Oh no! We tried and failed to book a court for you at {} on {}.
-                    The reason was: {}
+                    '''\
+                    <html>
+                      <head></head>
+                      <body>
+                        <p>Oh no! We tried and failed to book a court for you at {} on {}. The reason was: {}</p>
+                      </body>
+                    </html>
                     '''.format(
                         booking.court_location,
                         booking.datetime.astimezone(pacific).strftime('%a, %b %d, %Y %I:%M %p %Z'),
@@ -332,6 +352,7 @@ class Command(BaseCommand):
                     'bart.booking.2020@gmail.com',
                     [booking.user.email],
                 )
+                email.content_subtype = "html"
                 email.send()
 
             booking.save()
