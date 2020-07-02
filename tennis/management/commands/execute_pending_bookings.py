@@ -72,13 +72,13 @@ def authenticate(driver, root_url, login_email, login_password):
 def search_for_date(driver, booking_datetime):
     # Set month in calendar search widget
     dropdown = WebDriverWait(driver, DRIVER_WAIT).until(
-            ec.presence_of_element_located((By.XPATH, "//select[@class='xos']")))
+            ec.presence_of_element_located((By.XPATH, "//select[@class='xpf']")))
 
     dropdown.find_element(By.XPATH, "//option[. = '{}']".format(
         booking_datetime.strftime("%B"))).click()
 
     # Set year in calendar search widget
-    year_select = driver.find_element(By.XPATH, "//input[@class='xjq']")
+    year_select = driver.find_element(By.XPATH, "//input[@class='xjv']")
     year_select.clear()
     year_select.send_keys(booking_datetime.year)
 
