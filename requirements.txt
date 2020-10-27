@@ -1,7 +1,7 @@
 asn1crypto==1.2.0
 certifi==2019.11.28
 cffi==1.13.2
-cryptography==2.8
+cryptography==3.2
 dj-database-url==0.5.0
 Django==2.2.5
 django-common-helpers==0.9.2
