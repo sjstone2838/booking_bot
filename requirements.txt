@@ -11,7 +11,7 @@ flake8==3.7.9
 gunicorn==20.0.4
 idna==2.8
 mccabe==0.6.1
-Pillow==7.0.0
+Pillow==9.3.0
 psycopg2==2.8.4
 pycodestyle==2.5.0
 pycparser==2.19
